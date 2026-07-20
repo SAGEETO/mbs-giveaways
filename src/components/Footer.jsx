@@ -55,7 +55,12 @@ function Footer() {
             <Link to="/contact" className="block hover:text-yellow-400">
               Contact
             </Link>
-
+<Link
+  to="/admin/login"
+  className="block hover:text-yellow-400"
+>
+  Admin Login
+</Link>
           </div>
         </div>
 
