@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { collection, getDocs } from "firebase/firestore";
 import { Trophy, MapPin, Gift } from "lucide-react";
+import Footer from "../components/Footer";
 
 import { db } from "../firebase/config";
 import Navbar from "../components/Navbar";
@@ -152,7 +153,7 @@ function Winners() {
                         <h3 className="font-bold text-green-700">
                           {winner.giveawayTitle || "Giveaway"}
                         </h3>
-
+<Footer />
                       </div>
 
                     </div>

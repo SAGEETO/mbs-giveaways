@@ -1,4 +1,6 @@
 import { Routes, Route } from "react-router-dom";
+import About from "./pages/About";
+import Contact from "./pages/Contact";
 
 import ManageUsers from "./pages/ManageUsers";
 import GiveawayDetails from "./pages/GiveawayDetails";
@@ -34,6 +36,8 @@ function App() {
       <Route path="/" element={<Home />} />
       <Route path="/giveaways" element={<Giveaways />} />
       <Route path="/winners" element={<Winners />} />
+      <Route path="/about" element={<About />} />
+<Route path="/contact" element={<Contact />} />
       <Route
   path="/giveaway/:id"
   element={<GiveawayDetails />}

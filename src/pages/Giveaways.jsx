@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { collection, getDocs } from "firebase/firestore";
 import { Search } from "lucide-react";
+import Footer from "../components/Footer";
 
 import { db } from "../firebase/config";
 import Navbar from "../components/Navbar";
@@ -126,7 +127,7 @@ function Giveaways() {
               ))
 
             )}
-
+<Footer />
           </div>
         </div>
       </div>
