@@ -1,212 +1,118 @@
 import { useState } from "react";
-import { collection, addDoc, serverTimestamp } from "firebase/firestore";
+import { addDoc, collection, serverTimestamp } from "firebase/firestore";
 import { db } from "../firebase/config";
-import { uploadImage } from "../services/storage";
-import AdminSidebar from "../components/AdminSidebar";
 
 function CreateGiveaway() {
-  const [form, setForm] = useState({
-    title: "",
-    prize: "",
-    prizeValue: "",
-    category: "",
-    description: "",
-    endDate: "",
-    featured: false,
-  });
-
-  const [imageFile, setImageFile] = useState(null);
-  const [preview, setPreview] = useState("");
+  const [title, setTitle] = useState("");
+  const [prize, setPrize] = useState("");
+  const [description, setDescription] = useState("");
+  const [deadline, setDeadline] = useState("");
+  const [featured, setFeatured] = useState(false);
+  const [image, setImage] = useState("");
   const [loading, setLoading] = useState(false);
 
-  const handleChange = (e) => {
-    const { name, value, type, checked } = e.target;
-
-    setForm({
-      ...form,
-      [name]: type === "checkbox" ? checked : value,
-    });
-  };
-
-  const handleImage = (e) => {
-    const file = e.target.files[0];
-
-    if (!file) return;
-
-    if (!file.type.startsWith("image/")) {
-      alert("Please select a valid image.");
-      return;
-    }
-
-    if (file.size > 5 * 1024 * 1024) {
-      alert("Image must be less than 5MB.");
-      return;
-    }
-
-    setImageFile(file);
-    setPreview(URL.createObjectURL(file));
-  };
-
-  const handleSubmit = async (e) => {
+  const createGiveaway = async (e) => {
     e.preventDefault();
 
-    setLoading(true);
-
     try {
-      let imageURL = "";
-
-      if (imageFile) {
-        imageURL = await uploadImage(imageFile);
-      }
+      setLoading(true);
 
       await addDoc(collection(db, "giveaways"), {
-        ...form,
-        image: imageURL,
-        status: "active",
+        title,
+        prize,
+        description,
+        deadline,
+        featured,
+        image,
         createdAt: serverTimestamp(),
       });
 
       alert("🎉 Giveaway created successfully!");
 
-      setForm({
-        title: "",
-        prize: "",
-        prizeValue: "",
-        category: "",
-        description: "",
-        endDate: "",
-        featured: false,
-      });
-
-      setImageFile(null);
-      setPreview("");
+      setTitle("");
+      setPrize("");
+      setDescription("");
+      setDeadline("");
+      setFeatured(false);
+      setImage("");
 
     } catch (error) {
       console.error(error);
-      alert("Failed to create giveaway.");
+      alert(error.message);
+    } finally {
+      setLoading(false);
     }
-
-    setLoading(false);
   };
 
   return (
-    <div className="flex min-h-screen bg-gray-100">
-      <AdminSidebar />
-
-      <main className="flex-1 p-10">
-        <h1 className="text-4xl font-bold text-green-800 mb-8">
+    <div className="min-h-screen bg-green-950 flex items-center justify-center px-4 py-10">
+      <form
+        onSubmit={createGiveaway}
+        className="bg-white/10 backdrop-blur-xl p-8 rounded-3xl w-full max-w-lg border border-white/20"
+      >
+        <h1 className="text-3xl text-white font-bold text-center mb-6">
           Create Giveaway
         </h1>
 
-        <form
-          onSubmit={handleSubmit}
-          className="bg-white rounded-2xl shadow-xl p-8 max-w-3xl"
+        <input
+          className="w-full p-3 rounded-lg mb-4"
+          placeholder="Giveaway Title"
+          value={title}
+          onChange={(e) => setTitle(e.target.value)}
+          required
+        />
+
+        <input
+          className="w-full p-3 rounded-lg mb-4"
+          placeholder="Prize"
+          value={prize}
+          onChange={(e) => setPrize(e.target.value)}
+          required
+        />
+
+        <textarea
+          className="w-full p-3 rounded-lg mb-4"
+          rows="4"
+          placeholder="Description"
+          value={description}
+          onChange={(e) => setDescription(e.target.value)}
+          required
+        />
+
+        <input
+          type="date"
+          className="w-full p-3 rounded-lg mb-4"
+          value={deadline}
+          onChange={(e) => setDeadline(e.target.value)}
+          required
+        />
+
+        <input
+          type="text"
+          className="w-full p-3 rounded-lg mb-4"
+          placeholder="Paste Image URL"
+          value={image}
+          onChange={(e) => setImage(e.target.value)}
+          required
+        />
+
+        <label className="flex items-center gap-2 text-white mb-6">
+          <input
+            type="checkbox"
+            checked={featured}
+            onChange={(e) => setFeatured(e.target.checked)}
+          />
+          Make this the Featured Giveaway
+        </label>
+
+        <button
+          type="submit"
+          disabled={loading}
+          className="w-full bg-yellow-400 hover:bg-yellow-300 text-green-900 py-3 rounded-xl font-bold transition"
         >
-          <input
-            type="text"
-            name="title"
-            placeholder="Giveaway Title"
-            value={form.title}
-            onChange={handleChange}
-            className="w-full border rounded-lg p-4 mb-5"
-            required
-          />
-
-          <input
-            type="text"
-            name="prize"
-            placeholder="Prize Name"
-            value={form.prize}
-            onChange={handleChange}
-            className="w-full border rounded-lg p-4 mb-5"
-            required
-          />
-
-          <input
-            type="number"
-            name="prizeValue"
-            placeholder="Prize Value (USD)"
-            value={form.prizeValue}
-            onChange={handleChange}
-            className="w-full border rounded-lg p-4 mb-5"
-          />
-
-          <select
-            name="category"
-            value={form.category}
-            onChange={handleChange}
-            className="w-full border rounded-lg p-4 mb-5"
-            required
-          >
-            <option value="">Select Category</option>
-            <option value="Cash">Cash</option>
-            <option value="Car">Car</option>
-            <option value="Phone">Phone</option>
-            <option value="Electronics">Electronics</option>
-            <option value="Travel">Travel</option>
-            <option value="Gift Card">Gift Card</option>
-          </select>
-
-          <label className="block font-semibold mb-2">
-            Giveaway Image
-          </label>
-
-          <input
-            type="file"
-            accept="image/*"
-            onChange={handleImage}
-            className="w-full border rounded-lg p-3 mb-5"
-          />
-
-          {preview && (
-            <img
-              src={preview}
-              alt="Preview"
-              className="w-full h-64 object-cover rounded-xl mb-5"
-            />
-          )}
-
-          <input
-            type="date"
-            name="endDate"
-            value={form.endDate}
-            onChange={handleChange}
-            className="w-full border rounded-lg p-4 mb-5"
-            required
-          />
-
-          <textarea
-            name="description"
-            placeholder="Giveaway Description"
-            value={form.description}
-            onChange={handleChange}
-            rows="5"
-            className="w-full border rounded-lg p-4 mb-5"
-            required
-          />
-
-          <label className="flex items-center gap-3 mb-8">
-            <input
-              type="checkbox"
-              name="featured"
-              checked={form.featured}
-              onChange={handleChange}
-            />
-
-            <span className="font-semibold">
-              Make this a Featured Giveaway
-            </span>
-          </label>
-
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full bg-green-700 hover:bg-green-800 text-white py-4 rounded-xl font-bold text-lg"
-          >
-            {loading ? "Uploading Giveaway..." : "Create Giveaway"}
-          </button>
-        </form>
-      </main>
+          {loading ? "Creating Giveaway..." : "Create Giveaway"}
+        </button>
+      </form>
     </div>
   );
 }
