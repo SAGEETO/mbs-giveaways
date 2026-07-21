@@ -79,7 +79,7 @@ function Navbar() {
 
         {/* Apply Button */}
         <Link
-          to="/apply"
+          to="/giveaways"
           className="hidden lg:block bg-yellow-400 hover:bg-yellow-300 transition px-6 py-3 rounded-xl font-semibold text-green-900 shadow-lg"
         >
           Apply Now

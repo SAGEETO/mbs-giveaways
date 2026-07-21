@@ -99,36 +99,30 @@ function Giveaways() {
 
           </div>
 
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+     <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
 
-          {filteredGiveaways.length === 0 ? (
+  {filteredGiveaways.length === 0 ? (
+    <div className="col-span-full text-center py-20">
+      <h2 className="text-3xl font-bold text-gray-500">
+        No giveaways found
+      </h2>
 
-              <div className="col-span-full text-center py-20">
+      <p className="text-gray-400 mt-3">
+        Try searching with another keyword.
+      </p>
+    </div>
+  ) : (
+    filteredGiveaways.map((giveaway) => (
+      <GiveawayCard
+        key={giveaway.id}
+        giveaway={giveaway}
+      />
+    ))
+  )}
 
-                <h2 className="text-3xl font-bold text-gray-500">
-                  No giveaways found
-                </h2>
+</div>
 
-                <p className="text-gray-400 mt-3">
-                  Try searching with another keyword.
-                </p>
-
-              </div>
-
-            ) : (
-
-              filteredGiveaways.map((giveaway) => (
-
-                <GiveawayCard
-                  key={giveaway.id}
-                  giveaway={giveaway}
-                />
-
-              ))
-
-            )}
 <Footer />
-          </div>
         </div>
       </div>
     </>

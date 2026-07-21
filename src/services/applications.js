@@ -30,8 +30,24 @@ export async function submitApplication(application) {
   }
 
   return await addDoc(collection(db, "applications"), {
-    ...application,
+    giveawayId: application.giveawayId,
+    giveawayTitle: application.giveawayTitle,
+
+    userId: application.userId,
+
+    fullName: application.fullName,
+    email: application.email,
+    userEmail: application.email,
+
+    phone: application.phone,
+    country: application.country,
+
+    prize: application.prize || "",
+    image: application.image || "",
+
     status: "pending",
+
+    appliedAt: serverTimestamp(),
     createdAt: serverTimestamp(),
   });
 }
@@ -53,12 +69,10 @@ export async function updateApplication(id, data) {
 
 // Update application status
 export async function updateApplicationStatus(id, status) {
-  // Update status
   await updateDoc(doc(db, "applications", id), {
     status,
   });
 
-  // Get updated application
   const applicationRef = doc(db, "applications", id);
   const applicationSnap = await getDoc(applicationRef);
 
@@ -66,7 +80,6 @@ export async function updateApplicationStatus(id, status) {
 
   const application = applicationSnap.data();
 
-  // Approved notification
   if (status.toLowerCase() === "approved") {
     await sendNotification(
       application.userId,
@@ -75,7 +88,6 @@ export async function updateApplicationStatus(id, status) {
     );
   }
 
-  // Rejected notification
   if (status.toLowerCase() === "rejected") {
     await sendNotification(
       application.userId,
@@ -84,25 +96,26 @@ export async function updateApplicationStatus(id, status) {
     );
   }
 
-  // Winner
   if (status.toLowerCase() === "winner") {
-    // Save winner
     await addDoc(collection(db, "winners"), {
       applicationId: id,
-      userId: application.userId || "",
-      fullName: application.fullName || "",
-      email: application.email || application.userEmail || "",
-      phone: application.phone || "",
-      country: application.country || "",
-      giveawayId: application.giveawayId || "",
-      giveawayTitle: application.giveawayTitle || "",
+      userId: application.userId,
+
+      fullName: application.fullName,
+      email: application.email,
+      phone: application.phone,
+      country: application.country,
+
+      giveawayId: application.giveawayId,
+      giveawayTitle: application.giveawayTitle,
+
       prize: application.prize || "",
       image: application.image || "",
+
       wonAt: serverTimestamp(),
       createdAt: serverTimestamp(),
     });
 
-    // Winner notification
     await sendNotification(
       application.userId,
       "🏆 Congratulations!",
@@ -115,6 +128,8 @@ export async function updateApplicationStatus(id, status) {
 export async function deleteApplication(id) {
   return await deleteDoc(doc(db, "applications", id));
 }
+
+// Real-time listener
 export function subscribeToApplications(callback) {
   return onSnapshot(collection(db, "applications"), (snapshot) => {
     const applications = snapshot.docs.map((doc) => ({

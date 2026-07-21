@@ -1,15 +1,10 @@
-import { useEffect, useMemo, useState } from "react";
-import {
-  useParams,
-  useNavigate,
-} from "react-router-dom";
+import { useEffect, useState } from "react";
+import { useParams, useNavigate } from "react-router-dom";
 
 import {
   doc,
   getDoc,
-  addDoc,
   collection,
-  serverTimestamp,
   query,
   where,
   getDocs,
@@ -35,10 +30,12 @@ function GiveawayDetails() {
   const [loading, setLoading] = useState(true);
   const [applicants, setApplicants] = useState(0);
   const [alreadyApplied, setAlreadyApplied] = useState(false);
-const countdown =
-  giveaway?.endDate && new Date(giveaway.endDate) < new Date()
-    ? "Ended"
-    : "Active";
+
+  const countdown =
+    giveaway?.endDate && new Date(giveaway.endDate) < new Date()
+      ? "Ended"
+      : "Active";
+
   useEffect(() => {
     async function loadGiveaway() {
       try {
@@ -80,45 +77,6 @@ const countdown =
     loadGiveaway();
   }, [id]);
 
-  async function applyForGiveaway() {
-    const user = auth.currentUser;
-
-    if (!user) {
-      navigate("/login");
-      return;
-    }
-
-    if (alreadyApplied) {
-      alert("You have already applied for this giveaway.");
-      return;
-    }
-
-    if (countdown === "Ended") {
-      alert("This giveaway has ended.");
-      return;
-    }
-    try {
-      await addDoc(collection(db, "applications"), {
-        userId: user.uid,
-        userEmail: user.email,
-        fullName: user.displayName || "",
-        giveawayId: giveaway.id,
-        giveawayTitle: giveaway.title,
-        country: "",
-        status: "Pending",
-        appliedAt: serverTimestamp(),
-      });
-
-      setApplicants((prev) => prev + 1);
-      setAlreadyApplied(true);
-
-      alert("🎉 Application submitted successfully!");
-    } catch (error) {
-      console.error(error);
-      alert("Failed to submit application.");
-    }
-  }
-
   function shareGiveaway() {
     const shareData = {
       title: giveaway.title,
@@ -130,7 +88,6 @@ const countdown =
       navigator.share(shareData).catch(() => {});
     } else {
       navigator.clipboard.writeText(window.location.href);
-
       alert("Giveaway link copied to clipboard.");
     }
   }
@@ -139,7 +96,6 @@ const countdown =
     return (
       <>
         <Navbar />
-
         <div className="min-h-screen bg-green-950 flex items-center justify-center">
           <h2 className="text-2xl font-bold text-white">
             Loading Giveaway...
@@ -153,7 +109,6 @@ const countdown =
     return (
       <>
         <Navbar />
-
         <div className="min-h-screen bg-green-950 flex items-center justify-center">
           <h2 className="text-2xl font-bold text-white">
             Giveaway not found.
@@ -168,9 +123,7 @@ const countdown =
       <Navbar />
 
       <div className="min-h-screen bg-gray-100 pt-28 pb-16">
-
         <div className="max-w-7xl mx-auto px-6">
-
           <div className="bg-white rounded-3xl overflow-hidden shadow-xl">
 
             <img
@@ -183,10 +136,9 @@ const countdown =
             />
 
             <div className="p-8">
-
               <div className="flex flex-col lg:flex-row justify-between gap-8">
 
-              <div className="flex-1">
+                <div className="flex-1">
 
                   <div className="inline-flex items-center gap-2 bg-green-100 text-green-700 px-4 py-2 rounded-full font-semibold mb-5">
                     <Gift size={18} />
@@ -223,16 +175,13 @@ const countdown =
                           <p className="text-sm text-gray-500">
                             End Date
                           </p>
-
                           <p className="font-bold">
                             {giveaway.endDate || "Not specified"}
                           </p>
                         </div>
                       </div>
 
-                      <div>
-  <CountdownTimer deadline={giveaway.endDate} />
-</div>
+                      <CountdownTimer deadline={giveaway.endDate} />
 
                       <div className="flex items-center gap-3">
                         <Users className="text-purple-600" />
@@ -240,10 +189,7 @@ const countdown =
                           <p className="text-sm text-gray-500">
                             Applicants
                           </p>
-
-                          <p className="font-bold">
-                            {applicants}
-                          </p>
+                          <p className="font-bold">{applicants}</p>
                         </div>
                       </div>
 
@@ -253,7 +199,6 @@ const countdown =
                           <p className="text-sm text-gray-500">
                             Status
                           </p>
-
                           <p className="font-bold text-green-700">
                             {countdown}
                           </p>
@@ -269,12 +214,20 @@ const countdown =
                       <Share2 size={20} />
                       Share Giveaway
                     </button>
+
                     <button
-                      onClick={applyForGiveaway}
+                      onClick={() => {
+                        if (!auth.currentUser) {
+                          navigate("/login");
+                          return;
+                        }
+
+                        navigate(`/apply/${giveaway.id}`);
+                      }}
                       disabled={
-  alreadyApplied ||
-  countdown === "Ended"
-}
+                        alreadyApplied ||
+                        countdown === "Ended"
+                      }
                       className={`w-full mt-4 rounded-xl py-4 font-bold transition ${
                         alreadyApplied
                           ? "bg-gray-400 cursor-not-allowed text-white"
@@ -295,15 +248,11 @@ const countdown =
                 </div>
 
               </div>
-
             </div>
 
           </div>
-
         </div>
-
       </div>
-
     </>
   );
 }
